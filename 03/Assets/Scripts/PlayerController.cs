@@ -21,7 +21,19 @@ public class PlayerController : MonoBehaviour
     private BridegeSpawner _bridgeSpawner;
     private float _creatingBridgeTimer;//köprü yatarma zamanlayýcýsý
 
-    public Animator animator; 
+    private bool _finished; //finishline e gelip gelmediðini tutacak.
+
+    private float _scoreTimer = 0;
+
+    public Animator animator;
+
+    private float _lastTouchedX; //oyuncunun ekrana dokunuþ hassasiyetinde bir deðiþiklik yapacaðýz.oyuncunun ekrana dokunduðu son yatay pozisyonu bir deðiþkende tutacaðýz.
+    private float _dropSoundTimer; 
+
+    public AudioSource cylinderAudioSource;
+    public AudioClip gatherAudioClip, dropAudioClip;//silindir hacmi büyürken,küçülürken ses.
+
+
 
 
     void Start()
@@ -41,11 +53,23 @@ public class PlayerController : MonoBehaviour
 
         float newX = 0;//karakterin x de ki yeni pozisyonu.
         float touchXDelta = 0;//ne kadar kaydýrdýk saða sola
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase==TouchPhase.Moved){//ekrana dokunmuþ //ilk dokunuþun bilgilerini aldýk. //þuan ekrana dokunulmuþ parmak hareket halinde ise
+        if (Input.touchCount > 0){//ekrana dokunmuþ //ilk dokunuþun bilgilerini aldýk. //þuan ekrana dokunulmuþ parmak hareket halinde ise
 
-                touchXDelta = Input.GetTouch(0).deltaPosition.x / Screen.width;  //ilk dokunan parmaðýn o anki pozisyonundan þuanki pozisyonun farkýný alabilmek için deltapozition bilgisine eriþiyoruz.
-                //x dedik yani oyuncunun parmaðýný saða sola ne kadar kaydýrdýðýný almýþ oluyoruz. iyi bir oran almak için ekranýn geniþlik deðerine bölüyoruz.
-        }else if(Input.GetMouseButton(0)) //oyunuc telefonda deðil ise //0=sol tuþa basýyosa
+            if (Input.GetTouch(0).phase == TouchPhase.Began)//ekrana ilk defa dokunuyorsa
+            {
+                _lastTouchedX = Input.GetTouch(0).position.x; //dokunulan pozisyonun x ine eþitle dicem.
+            }
+            else if(Input.GetTouch(0).phase == TouchPhase.Moved)//ilk defa dokunmuyorsa, parmaðýný hareket ettiriyorsa 
+            {
+                //karakteri hareket ettirmek için
+                touchXDelta =5* ( _lastTouchedX- Input.GetTouch(0).position.x) / Screen.width;  //fark kadar ilerlemiþ olacak karakterimiz.//ilk dokunan parmaðýn o anki pozisyonundan þuanki pozisyonun farkýný alabilmek için deltapozition bilgisine eriþiyoruz.
+                                                                                                //x dedik yani oyuncunun parmaðýný saða sola ne kadar kaydýrdýðýný almýþ oluyoruz. iyi bir oran almak için ekranýn geniþlik deðerine bölüyoruz.
+                                                                                                //daha hassas bir dokunuþ için ramamý 5 ile çarpýcam.
+                _lastTouchedX = Input.GetTouch(0).position.x;//son dokunulmuþ x i güncellemem lazým.
+            }
+
+        }
+        else if(Input.GetMouseButton(0)) //oyunuc telefonda deðil ise //0=sol tuþa basýyosa
          {
             touchXDelta = Input.GetAxis("Mouse X");//x düzleminde mouse ne kadar hareket etti.
          }
@@ -58,9 +82,10 @@ public class PlayerController : MonoBehaviour
 
         if (_spawningBridge==true) //köprü yaratýp yaratmadýðýný kontrol edeceðim
         {
+            PlayDropSound();
             //nesneleri her kare yaratmayacaðýz. belli bir süre bekleyeceðiz
             _creatingBridgeTimer -= Time.deltaTime; //ve köprüyü yatattýðýmýz her karede time.deltatime i çýkaracaðýz.
-            if (_creatingBridgeTimer<0)//yeni köprü parçasýný yaratacaðýz ve _creatingBridgeTimer i güncelle.
+            if (_creatingBridgeTimer<0)//yeni köprü parçasýný yaratacaðýz ve _creatingBridgeTimer i güncelle.  //köprüyü kurup karakter altýndaki silindirleri azaltýyorduk
             {
                 _creatingBridgeTimer = 0.01f;
                 IncrementCylinderVolume(-0.01f); //ayný zamanda köprüyü yaratacaðým zaman altýndaki silindirlerin hacmini de küçültemem gerekiyor. //bu parametriyide bir üsteki gibi küçültüp 0.01 yapýyoruz çünkü
@@ -77,7 +102,18 @@ public class PlayerController : MonoBehaviour
                 characterDistance = Mathf.Clamp(characterDistance, 0, distance); //sýnýrlandýrma yapýyorum characterdistance için max ve min. distance=baðlangýç referansýn bitiþ referansa uzaklýðý
                 Vector3 newPiecePosition = _bridgeSpawner.startReference.transform.position + direction * characterDistance; //yarattýðýmýz objenin yeni pozisyonunu tutmasý için vektör3 tipinde bir deðiþken oluþturuyorum.//baþlangýç ref den karakterin uzaklýðý kadar ilerleticez demiþtik.
                 newPiecePosition.x = transform.position.x; //karakter saða sola ne kadar gitti ise yeni parçada saða sola o kadar gitsin.           
-                createdBridgePiece.transform.position = newPiecePosition; //son olarak yarattýðým parçanýn pozisyonunu bu yeni vektöre eþitliyorum            
+                createdBridgePiece.transform.position = newPiecePosition; //son olarak yarattýðým parçanýn pozisyonunu bu yeni vektöre eþitliyorum
+
+                if (_finished)//finish çizgisine geldiyse belli süreler içinde skor kazan
+                {
+                    //eðer köprü yaratýrken oyunu bitirmiþsen skor timer dan geri saymaya baþla
+                    _scoreTimer -= Time.deltaTime;
+                    if (_scoreTimer<0)//veya skor timer sýfýr a ulaþtýysa ve ya küçük olmuþsa önce skortimeri güncelle 
+                    {
+                        _scoreTimer = 0.3f;//er bir bölü 3 saniyede skor kazansýn.
+                        LevelController.Current.ChangeScore(1); //skor u bir arttýrýcam.
+                    }
+                }
             }
         }
     }
@@ -91,6 +127,8 @@ public class PlayerController : MonoBehaviour
     {
         if (other.tag=="AddCylinder")//silindiri büyüt ve çarpýþtýðýmýzý yok et.
         {
+            cylinderAudioSource.PlayOneShot(gatherAudioClip,0.1f);//sadece bir defa çal. parametre:hangi clipi çalacak,ne kadar yükses ses ile çalayým.//1 en yükses se, 0 en düþük
+
             IncrementCylinderVolume(0.1f); 
             Destroy(other.gameObject);
         }else if (other.tag=="SpawnBridge")//çarptýðý nesne köprü oluþturmaya baþlayan nesene ise.
@@ -99,16 +137,30 @@ public class PlayerController : MonoBehaviour
         }else if (other.tag=="StopSpawnBridge")
         {
             StopSpawingBridge();
+            if (_finished)//eðer bitiþ çizgisinde ise 
+            {
+                LevelController.Current.FinishGame();
+            }
+        }else if (other.tag == "Finish")
+        {
+            _finished = true;
+            StartSpawningBridge(other.transform.parent.GetComponent<BridegeSpawner>());
         }
     }
 
     private void OnTriggerStay(Collider other)//karakter objemizin kolaydýrýnda istrigger olan bir objeye çarpýþtýðý her süre boyunca. her çarpýþma anýnda
     {
-        if (other.tag == "Trap")
+        
+        if (LevelController.Current.gameActive)//þuanki oyun aktif mi.o zman tuzakla çarpýþýp çarpýþmadýðýný kontrol et. yoksa tuzak üstünde ölünce yine o silindir azalma sesi gelir.
         {
-            IncrementCylinderVolume(-Time.fixedDeltaTime);//ontrigger fonksiyonlarý fizik döngüsünde çalýþtýklarý için fizikle alakalý olan zaman birimini kullanacaðým.
-            //silindirleri azaltmak istediðim içim eksi koyuyorum.
+            if (other.tag == "Trap")//eðer tuzaða çarparsa silindiri azalt.
+            {
+                PlayDropSound();
+                IncrementCylinderVolume(-Time.fixedDeltaTime);//ontrigger fonksiyonlarý fizik döngüsünde çalýþtýklarý için fizikle alakalý olan zaman birimini kullanacaðým.
+                                                              //silindirleri azaltmak istediðim içim eksi koyuyorum.
+            }
         }
+        
     }
 
     public void IncrementCylinderVolume(float value)//Silindir hacmini arttýr value=artýþ deðeri
@@ -122,6 +174,15 @@ public class PlayerController : MonoBehaviour
             else
             {
                 //Gameover
+
+                if (_finished)//eðer karakter bitiþ çizgisine ulaþtýysa game ove olmayacakleveli bitiricez.
+                {
+                    LevelController.Current.FinishGame();
+                }
+                else//çizgiye ulaþmadan silindirleri bittiyse.
+                {
+                    Die(); 
+                }
             }
         }
         else//en alttaki silindir boyutunu güncelle.
@@ -129,6 +190,17 @@ public class PlayerController : MonoBehaviour
             cylinders[cylinders.Count - 1].IncrementCylinderVolume(value); //son index e -1 ile eriþiyoruz.
         }
     }
+
+    public void Die()//karakter bu fonksiyonu çaðýrdýðýnda ölecek.
+    {
+        animator.SetBool("dead", true);
+        gameObject.layer = 6; //karakter layer ini 6 yapacaðým.(caracterlayer.)
+        Camera.main.transform.SetParent(null); //karakter aþaðý düþebileceði için kamara onu takip etmesin diye kamaranýn parentini null yapýcam.
+        LevelController.Current.GameOver();
+    }
+
+
+
     public void CreateCylinder(float value)//yeni silindir yaratmak için
     {
         RidingCylinder createdCylinder = Instantiate(ridingCylinderPrefab, transform).GetComponent<RidingCylinder>(); //yaratýlan adamýn çocuðu oluyor.
@@ -149,6 +221,17 @@ public class PlayerController : MonoBehaviour
     public void StopSpawingBridge()
     {
         _spawningBridge = false;
+    }
+
+    public void PlayDropSound()//silindir azalýrken ses
+    {
+        _dropSoundTimer -= Time.deltaTime;//saniye gibi geri sayýyorum
+        //sýfýrdan küçükse sesi çal diyeceðim. ve zamanlayýcýyý sýfýrla.
+        if (_dropSoundTimer<0)
+        {
+            _dropSoundTimer = 0.15f;
+            cylinderAudioSource.PlayOneShot(dropAudioClip,0.1f);
+        }
     }
 
 }
