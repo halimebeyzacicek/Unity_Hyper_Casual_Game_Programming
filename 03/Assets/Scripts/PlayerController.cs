@@ -30,17 +30,8 @@ public class PlayerController : MonoBehaviour
     private float _lastTouchedX; //oyuncunun ekrana dokunuþ hassasiyetinde bir deðiþiklik yapacaðýz.oyuncunun ekrana dokunduðu son yatay pozisyonu bir deðiþkende tutacaðýz.
     private float _dropSoundTimer; 
 
-    public AudioSource cylinderAudioSource;
-    public AudioClip gatherAudioClip, dropAudioClip;//silindir hacmi büyürken,küçülürken ses.
-
-
-
-
-    void Start()
-    {
-        Current = this;
-        //_currentRunningSpeed = runningSpeed;
-    }
+    public AudioSource cylinderAudioSource,triggerAudioSource;
+    public AudioClip gatherAudioClip, dropAudioClip,coinAudioClip;//silindir hacmi büyürken,küçülürken ses.
 
     
     void Update()
@@ -145,6 +136,12 @@ public class PlayerController : MonoBehaviour
         {
             _finished = true;
             StartSpawningBridge(other.transform.parent.GetComponent<BridegeSpawner>());
+        }else if (other.tag == "Coin")
+        {
+            triggerAudioSource.PlayOneShot(coinAudioClip,0.1f);
+            other.tag = "Untagged";//iki silindir çarparsa eðer iki kere puan kazanmamamsý için.
+            LevelController.Current.ChangeScore(10);
+            Destroy(other.gameObject);
         }
     }
 
