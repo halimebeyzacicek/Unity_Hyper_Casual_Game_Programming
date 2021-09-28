@@ -120,7 +120,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6734465379772746479}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 374269728632662170}
+        m_TargetAssemblyTypeName: MarketItem, Assembly-CSharp
+        m_MethodName: UnEquipItemButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4379169039912018915
 GameObject:
   m_ObjectHideFlags: 0
@@ -241,7 +253,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2692700464915813600}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 374269728632662170}
+        m_TargetAssemblyTypeName: MarketItem, Assembly-CSharp
+        m_MethodName: EquipItenButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6142394550671719186
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,6 +356,7 @@ GameObject:
   - component: {fileID: 1446265891707948603}
   - component: {fileID: 7688914516431596989}
   - component: {fileID: 6305537227321018250}
+  - component: {fileID: 374269728632662170}
   m_Layer: 5
   m_Name: Item
   m_TagString: Untagged
@@ -400,6 +425,26 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &374269728632662170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6668084420691529627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd62d0a9de766e54c9161019214fffb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 0
+  wearId: 0
+  price: 0
+  butButton: {fileID: 6053530856910919148}
+  equipButton: {fileID: 9172380613724895505}
+  unequipButton: {fileID: 6820903139073283440}
+  priceText: {fileID: 8178072822058262271}
+  itemPrefab: {fileID: 0}
 --- !u!1 &6979368482249669913
 GameObject:
   m_ObjectHideFlags: 0
@@ -829,4 +874,16 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1038039838839076815}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 374269728632662170}
+        m_TargetAssemblyTypeName: MarketItem, Assembly-CSharp
+        m_MethodName: ButItem
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

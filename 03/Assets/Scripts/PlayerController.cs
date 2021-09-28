@@ -30,10 +30,11 @@ public class PlayerController : MonoBehaviour
     private float _lastTouchedX; //oyuncunun ekrana dokunuþ hassasiyetinde bir deðiþiklik yapacaðýz.oyuncunun ekrana dokunduðu son yatay pozisyonu bir deðiþkende tutacaðýz.
     private float _dropSoundTimer; 
 
-    public AudioSource cylinderAudioSource,triggerAudioSource;
-    public AudioClip gatherAudioClip, dropAudioClip,coinAudioClip;//silindir hacmi büyürken,küçülürken ses.
+    public AudioSource cylinderAudioSource,triggerAudioSource,itemAudioSource;
+    public AudioClip gatherAudioClip, dropAudioClip,coinAudioClip,buyAudioClip,equipItemAudioClip,unequipItemAudioClip;//silindir hacmi büyürken,küçülürken ses.
 
-    
+    public List<GameObject> wearSpots;  //karakterime giyilme alanlarý oluþturmam gerekiyor. bu alanlarý liste olarak oluþturacaðým.
+
     void Update()
     {
         

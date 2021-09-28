@@ -38,11 +38,14 @@ public class LevelController : MonoBehaviour
         else //doðru levelde isek //levelcontrollerin arayüzlere eiþmesi gerekiyor.
         {
             PlayerController.Current = GameObject.FindObjectOfType<PlayerController>();//burada player control u yazdýk. çünkü maketten player a eriþmek gerekebilir ve marketten önce player kontrol bulunmuþ olmalý.  
+            GameObject.FindObjectOfType<MarketController>().InitializeMarketController();
+
             dailyReward.InitializeDailyReward(); //doðru levelde isek o bölümdede ödül sistemimizi tanýmlýyorum
             Debug.Log("girdi2"+ currentLevel);
             currentLevelText.text = (currentLevel + 1).ToString();   //sýfýnrýncý bölümde isek 1----2 yazmalý
             nextLevelText.text = (currentLevel + 2).ToString();
             UpdateMoneyTexts();
+            //GiveMoneyToPlayer(3000);
         }
         gameMusicAudioSource = Camera.main.GetComponent<AudioSource>();//kameradan sesi çekecek. baþlangýç sesini(oyun sesini)
     }
